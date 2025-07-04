@@ -95,3 +95,8 @@ window.onload = function() {
     showApp(currentUser);
   }
 };
+
+function logout() {
+  localStorage.removeItem("currentUser");
+  location.reload(); // перезагрузим страницу — вернёмся к экрану входа
+}
