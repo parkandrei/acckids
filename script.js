@@ -99,6 +99,8 @@ function renderVisits(visits) {
   const summary = document.createElement("tr");
   summary.innerHTML = `<td colspan="2"><strong>Сумма всех баллов: ${total}</strong></td>`;
   visitTable.appendChild(summary);
+
+  document.getElementById("childScore").textContent = total;
 }
 
 function logout() {
