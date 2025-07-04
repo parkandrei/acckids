@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Дневник в садике</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="login-screen" id="loginScreen">
+    <h2>Вход</h2>
+    <input type="text" id="login" placeholder="Логин" />
+    <input type="password" id="password" placeholder="Пароль" />
+    <button onclick="login()">Войти</button>
+    <div id="loginError" class="error"></div>
+  </div>
+
+  <div class="app hidden" id="app">
+    <h2 id="childName"></h2>
+    <img id="childPhoto" src="img/no-photo.jpg" alt="Фото ребенка" width="150" />
+    <p><strong>Дата рождения:</strong> <span id="childDOB"></span></p>
+    <h3>Добавить посещение</h3>
+    <form id="visitForm">
+      <input type="date" id="visitDate" required />
+      <input type="text" id="grades" placeholder="Оценки (через запятую)" required />
+      <button type="submit">Добавить</button>
+    </form>
+    <h3>Посещения</h3>
+    <table id="visitsTable">
+      <thead><tr><th>Дата</th><th>Оценки</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <script src="data.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
