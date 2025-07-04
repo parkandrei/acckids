@@ -82,14 +82,23 @@ function renderChild(login, editable) {
 function renderVisits(visits) {
   const visitTable = document.querySelector("#visitsTable tbody");
   visitTable.innerHTML = "";
+
   let total = 0;
-  let max = visits.length * 4;
 
   visits.forEach(v => {
     const row = document.createElement("tr");
     row.innerHTML = `<td>${v.date}</td><td>${v.grades}</td>`;
     visitTable.appendChild(row);
+
+    const numbers = v.grades.match(/\d+/g);
+    if (numbers) {
+      total += numbers.reduce((sum, val) => sum + parseInt(val), 0);
+    }
   });
+
+  const summary = document.createElement("tr");
+  summary.innerHTML = `<td colspan="2"><strong>Сумма всех баллов: ${total}</strong></td>`;
+  visitTable.appendChild(summary);
 }
 
 function logout() {
