@@ -82,6 +82,9 @@ function renderChild(login, editable) {
 function renderVisits(visits) {
   const visitTable = document.querySelector("#visitsTable tbody");
   visitTable.innerHTML = "";
+  let total = 0;
+  let max = visits.length * 4;
+
   visits.forEach(v => {
     const row = document.createElement("tr");
     row.innerHTML = `<td>${v.date}</td><td>${v.grades}</td>`;
