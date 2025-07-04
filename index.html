@@ -15,23 +15,34 @@
   </div>
 
   <div class="app hidden" id="app">
-    <h2 id="childName"></h2>
-    <img id="childPhoto" src="img/no-photo.jpg" alt="Фото ребенка" width="150" />
-    <p><strong>Дата рождения:</strong> <span id="childDOB"></span></p>
-    <h3>Добавить посещение</h3>
-    <form id="visitForm">
-      <input type="date" id="visitDate" required />
-      <input type="text" id="grades" placeholder="Оценки (через запятую)" required />
-      <button type="submit">Добавить</button>
-    </form>
-    <h3>Посещения</h3>
-    <table id="visitsTable">
-      <thead><tr><th>Дата</th><th>Оценки</th></tr></thead>
-      <tbody></tbody>
-    </table>
+    <h2 id="userTitle"></h2>
+    <div id="childSelector" class="hidden">
+      <label for="selectChild">Выберите ребёнка:</label>
+      <select id="selectChild"></select>
+    </div>
+    <div id="childCard" class="hidden">
+      <img id="childPhoto" src="img/no-photo.jpg" alt="Фото ребенка" width="150" />
+      <p><strong>Имя:</strong> <span id="childName"></span></p>
+      <p><strong>Дата рождения:</strong> <span id="childDOB"></span></p>
+      <div id="adminForm" class="hidden">
+        <h3>Добавить посещение</h3>
+        <form id="visitForm">
+          <input type="date" id="visitDate" required />
+          <input type="number" id="gradeVisit" placeholder="Посещение (1-5)" min="1" max="5" required />
+          <input type="number" id="gradeActivity" placeholder="Активность (1-5)" min="1" max="5" required />
+          <input type="number" id="gradeBehavior" placeholder="Поведение (1-5)" min="1" max="5" required />
+          <input type="number" id="gradePoem" placeholder="Стих (1-5)" min="1" max="5" required />
+          <button type="submit">Добавить</button>
+        </form>
+      </div>
+      <h3>Посещения</h3>
+      <table id="visitsTable">
+        <thead><tr><th>Дата</th><th>Оценки</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
   </div>
 
-  <script src="data.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
