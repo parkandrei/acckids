@@ -62,10 +62,10 @@ function renderChild(login, editable) {
     e.preventDefault();
     const date = document.getElementById("visitDate").value;
     const grades =
-      "посещение: " + document.getElementById("gradeVisit").value +
-      ", активность: " + document.getElementById("gradeActivity").value +
-      ", поведение: " + document.getElementById("gradeBehavior").value +
-      ", стих: " + document.getElementById("gradePoem").value;
+      "посещение: " + (document.getElementById("gradeVisit").checked ? 1 : 0) +
+      ", активность: " + (document.getElementById("gradeActivity").checked ? 1 : 0) +
+      ", поведение: " + (document.getElementById("gradeBehavior").checked ? 1 : 0) +
+      ", стих: " + (document.getElementById("gradePoem").checked ? 1 : 0);
     const key = login + "_visits";
 
     const visits = JSON.parse(localStorage.getItem(key) || "[]");
@@ -89,14 +89,14 @@ function renderVisits(visits) {
   });
 }
 
+function logout() {
+  localStorage.removeItem("currentUser");
+  location.reload();
+}
+
 window.onload = function() {
   const currentUser = localStorage.getItem("currentUser");
   if (currentUser && users[currentUser]) {
     showApp(currentUser);
   }
 };
-
-function logout() {
-  localStorage.removeItem("currentUser");
-  location.reload(); // перезагрузим страницу — вернёмся к экрану входа
-}

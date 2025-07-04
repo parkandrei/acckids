@@ -15,8 +15,7 @@
   </div>
 
   <div class="app hidden" id="app">
-    <h2 id="userTitle"></h2>
-    <button onclick="logout()" style="float:right">Выйти</button>
+    <h2 id="userTitle"></h2><button onclick="logout()" style="float:right">Выйти</button>
     <div id="childSelector" class="hidden">
       <label for="selectChild">Выберите ребёнка:</label>
       <select id="selectChild"></select>
@@ -29,10 +28,10 @@
         <h3>Добавить посещение</h3>
         <form id="visitForm">
           <input type="date" id="visitDate" required />
-          <input type="number" id="gradeVisit" placeholder="Посещение (1-5)" min="1" max="5" required />
-          <input type="number" id="gradeActivity" placeholder="Активность (1-5)" min="1" max="5" required />
-          <input type="number" id="gradeBehavior" placeholder="Поведение (1-5)" min="1" max="5" required />
-          <input type="number" id="gradePoem" placeholder="Стих (1-5)" min="1" max="5" required />
+          <label><input type="checkbox" id="gradeVisit" /> Посещение</label><br>
+          <label><input type="checkbox" id="gradeActivity" /> Активность</label><br>
+          <label><input type="checkbox" id="gradeBehavior" /> Поведение</label><br>
+          <label><input type="checkbox" id="gradePoem" /> Стих</label>
           <button type="submit">Добавить</button>
         </form>
       </div>
