@@ -1,20 +1,32 @@
-const users = {
-  "super": { name: "Супер Админ", role: "superadmin", password: "Super2025" },
-  "admin": { name: "Воспитатель", role: "admin", password: "Admin2025" },
-  "alpha": { name: "Альфа", surname: "Один", patronymic: "Первая", dob: "2020-01-01", role: "parent", password: "Aa123456" },
-  "beta": { name: "Бета", surname: "Два", patronymic: "Вторая", dob: "2020-02-02", role: "parent", password: "Bb123456" },
-  "omega": { name: "Омега", surname: "Ласт", patronymic: "Последняя", dob: "2020-03-03", role: "parent", password: "Oo123456" }
+// Новый script.js с хранением всех данных на сервере
+
+const API_URL = "https://78ce0db1-6312-44f3-b53b-5d3edd6e82b1-00-31n5h4rv9zmjo.pike.replit.dev/data";
+
+let data = {
+  users: {},
+  visits: {}
 };
 
-const storedUsers = localStorage.getItem("users");
-if (storedUsers) {
-  Object.assign(users, JSON.parse(storedUsers));
+let currentUser = "";
+let currentRole = "";
+
+async function loadData() {
+  const res = await fetch(API_URL);
+  data = await res.json();
+}
+
+async function saveData() {
+  await fetch(API_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data)
+  });
 }
 
 function login() {
   const login = document.getElementById("login").value;
   const password = document.getElementById("password").value;
-  const user = users[login];
+  const user = data.users[login];
   const errorBox = document.getElementById("loginError");
 
   if (!user || user.password !== password) {
@@ -22,36 +34,33 @@ function login() {
     return;
   }
 
+  currentUser = login;
+  currentRole = user.role;
   localStorage.setItem("currentUser", login);
-  showApp(login);
+  showApp();
 }
 
-let currentUser = "";
-let currentRole = "";
-
-function showApp(login) {
+function showApp() {
   document.getElementById("loginScreen").classList.add("hidden");
   document.getElementById("app").classList.remove("hidden");
 
-  currentUser = login;
-  const user = users[login];
-  currentRole = user.role;
+  const user = data.users[currentUser];
   const isAdmin = user.role === "admin";
   const isSuper = user.role === "superadmin";
 
   document.getElementById("userTitle").textContent =
-    isSuper ? "Добро пожаловать, Супер-админ" :
-    isAdmin ? "Добро пожаловать, Воспитатель" :
+    isSuper ? "Добро пожаловать, супер-админ" :
+    isAdmin ? "Добро пожаловать, воспитатель" :
     `Дневник: ${user.name}`;
 
   if (isAdmin || isSuper) {
     const selector = document.getElementById("selectChild");
     selector.innerHTML = "";
-    for (let key in users) {
-      if (users[key].role === "parent") {
+    for (let key in data.users) {
+      if (data.users[key].role === "parent") {
         const opt = document.createElement("option");
         opt.value = key;
-        opt.textContent = users[key].name;
+        opt.textContent = data.users[key].name;
         selector.appendChild(opt);
       }
     }
@@ -65,102 +74,12 @@ function showApp(login) {
     }
   } else {
     document.getElementById("childSelector").classList.add("hidden");
-    renderChild(login, false);
-  }
-}
-
-function renderUserList() {
-  const list = document.getElementById("userList");
-  list.innerHTML = "";
-  for (const [login, u] of Object.entries(users)) {
-    const line = document.createElement("div");
-    line.innerHTML = `${login} (${u.role}) — ${u.password} `;
-
-    // Кнопка смены пароля
-    const editPass = document.createElement("button");
-    editPass.textContent = "Изменить пароль";
-    editPass.onclick = () => showPasswordEditor(login);
-    line.appendChild(editPass);
-
-    // Кнопка редактирования
-    const editUser = document.createElement("button");
-    editUser.textContent = "Редактировать";
-    editUser.onclick = () => showEditForm(login);
-    line.appendChild(editUser);
-
-    // Кнопка удаления
-    if (login !== "super") { // супер-админа нельзя удалить
-      const deleteBtn = document.createElement("button");
-      deleteBtn.textContent = "Удалить";
-      deleteBtn.onclick = () => deleteUser(login);
-      line.appendChild(deleteBtn);
-    }
-
-    list.appendChild(line);
-  }
-}
-
-function deleteUser(login) {
-  if (!confirm(`Удалить пользователя ${login}?`)) return;
-
-  // Удаляем пользователя
-  delete users[login];
-
-  // Удаляем данные посещений
-  localStorage.removeItem(login + "_visits");
-
-  // Сохраняем
-  localStorage.setItem("users", JSON.stringify(users));
-
-  // Обновляем список
-  renderUserList();
-}
-
-
-function showPasswordEditor(login) {
-  document.getElementById("editUserId").textContent = login;
-  document.getElementById("newPassword").value = "";
-  document.getElementById("passwordEdit").classList.remove("hidden");
-}
-
-function saveNewPassword() {
-  const login = document.getElementById("editUserId").textContent;
-  const newPass = document.getElementById("newPassword").value;
-  if (newPass) {
-    users[login].password = newPass;
-    localStorage.setItem("users", JSON.stringify(users));
-    alert("Пароль обновлён");
-    renderUserList();
-    document.getElementById("passwordEdit").classList.add("hidden");
+    renderChild(currentUser, false);
   }
 }
 
 function renderChild(login, editable) {
-  const user = users[login];
-  document.getElementById("childCard").classList.remove("hidden");
-  
-  // Установка фото если есть
-  const photoKey = `${login}_photo`;
-  const photoUrl = localStorage.getItem(photoKey);
-  const photoElement = document.getElementById("childPhoto");
-  photoElement.src = photoUrl || "data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150' viewBox='0 0 150 150'%3E%3Crect width='150' height='150' fill='%23f0f0f0'/%3E%3Ctext x='50%25' y='50%25' font-family='Arial' font-size='16' fill='%23999' text-anchor='middle' dominant-baseline='middle'%3EНет фото%3C/text%3E%3C/svg%3E";
-  
-  // Показываем кнопку загрузки только для супер-админа
-  document.getElementById("photoUpload").classList.toggle("hidden", currentRole !== "superadmin");
-  
-  // Обработчик загрузки фото
-  document.getElementById("photoInput").onchange = function(e) {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = function(event) {
-        photoElement.src = event.target.result;
-        localStorage.setItem(photoKey, event.target.result);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
+  const user = data.users[login];
   document.getElementById("childCard").classList.remove("hidden");
   document.getElementById("childName").textContent = user.name;
   document.getElementById("childSurname").textContent = user.surname || "-";
@@ -169,70 +88,61 @@ function renderChild(login, editable) {
   document.getElementById("adminForm").classList.toggle("hidden", !editable);
   document.getElementById("editChildBtn").classList.toggle("hidden", !editable);
 
-  const visitForm = document.getElementById("visitForm");
-visitForm.onsubmit = function(e) {
-  e.preventDefault();
-  const date = document.getElementById("visitDate").value;
+  const form = document.getElementById("visitForm");
+  form.onsubmit = async function(e) {
+    e.preventDefault();
+    const date = document.getElementById("visitDate").value;
+    const grades = [
+      document.getElementById("gradeVisit").checked ? 1 : 0,
+      document.getElementById("gradeActivity").checked ? 1 : 0,
+      document.getElementById("gradeBehavior").checked ? 1 : 0,
+      document.getElementById("gradePoem").checked ? 1 : 0
+    ];
+    const sum = grades.reduce((a, b) => a + b, 0);
+    const gradesText = `x${sum}: посещение: ${grades[0]}, активность: ${grades[1]}, поведение: ${grades[2]}, стих: ${grades[3]}`;
+    const addedAt = new Date().toLocaleString();
 
-  const gradeValues = [
-    document.getElementById("gradeVisit").checked ? 1 : 0,
-    document.getElementById("gradeActivity").checked ? 1 : 0,
-    document.getElementById("gradeBehavior").checked ? 1 : 0,
-    document.getElementById("gradePoem").checked ? 1 : 0
-  ];
+    if (!data.visits[login]) data.visits[login] = [];
+    data.visits[login].push({ date, grades: gradesText, addedAt });
+    await saveData();
+    renderVisits(login);
+    form.reset();
+  };
 
-  const sum = gradeValues.reduce((a, b) => a + b, 0);
-
-  const gradesText =
-    `x${sum}: посещение: ${gradeValues[0]}, активность: ${gradeValues[1]}, поведение: ${gradeValues[2]}, стих: ${gradeValues[3]}`;
-
-  const key = login + "_visits";
-  const visits = JSON.parse(localStorage.getItem(key) || "[]");
-  const now = new Date().toLocaleString();
-visits.push({ date, grades: gradesText, timestamp: now });
-  localStorage.setItem(key, JSON.stringify(visits));
-  renderVisits(visits);
-  visitForm.reset();
-};
-
-
-  const savedVisits = JSON.parse(localStorage.getItem(login + "_visits") || "[]");
-  renderVisits(savedVisits);
+  renderVisits(login);
 }
 
-function renderVisits(visits) {
-  const visitTable = document.querySelector("#visitsTable tbody");
-  visitTable.innerHTML = "";
-
+function renderVisits(login) {
+  const thead = document.querySelector("#visitsTable thead");
+  const tbody = document.querySelector("#visitsTable tbody");
+  thead.innerHTML = "<tr><th>Дата</th><th>Оценки</th><th>Внесено</th><th></th></tr>";
+  tbody.innerHTML = "";
   let total = 0;
-
+  const visits = data.visits[login] || [];
   visits.forEach((v, i) => {
     const row = document.createElement("tr");
-    const del = (currentRole === "superadmin") ? `<td><button onclick="deleteVisit(${i})">✖</button></td>` : "<td></td>";
-
-    // Подсчёт суммы
+    const del = (currentRole === "superadmin") ? `<td><button onclick=\"deleteVisit('${login}',${i})\">✖</button></td>` : "<td></td>";
     const numbers = v.grades.match(/\d+/g)?.map(Number) || [];
-    const sum = numbers.slice(-4).reduce((s, n) => s + n, 0); // берём только последние 4 оценки
+    const sum = numbers.slice(-4).reduce((s, n) => s + n, 0);
     total += sum;
-
-    row.innerHTML = `<td>${v.date}</td><td>${v.grades}<br><small>Внесено: ${v.timestamp || "—"}</small></td>${del}`;
-    visitTable.appendChild(row);
+    row.innerHTML = `
+      <td>${v.date}</td>
+      <td>${v.grades}</td>
+      <td>${v.addedAt || "-"}</td>
+      ${del}`;
+    tbody.appendChild(row);
   });
-
   const summary = document.createElement("tr");
-  summary.innerHTML = `<td colspan="3"><strong>Сумма всех баллов: ${total}</strong></td>`;
-  visitTable.appendChild(summary);
+  summary.innerHTML = `<td colspan="4"><strong>Сумма всех баллов: ${total}</strong></td>`;
+  tbody.appendChild(summary);
   document.getElementById("childScore").textContent = total;
 }
 
-function deleteVisit(index) {
+async function deleteVisit(login, index) {
   if (!confirm("Удалить эту запись?")) return;
-  const login = document.getElementById("selectChild")?.value || currentUser;
-  const key = login + "_visits";
-  const visits = JSON.parse(localStorage.getItem(key) || "[]");
-  visits.splice(index, 1);
-  localStorage.setItem(key, JSON.stringify(visits));
-  renderVisits(visits);
+  data.visits[login].splice(index, 1);
+  await saveData();
+  renderVisits(login);
 }
 
 function logout() {
@@ -240,67 +150,12 @@ function logout() {
   location.reload();
 }
 
-function showEditForm(login = currentUser) {
-  const u = users[login];
-  document.getElementById("editName").value = u.name;
-  document.getElementById("editSurname").value = u.surname || "";
-  document.getElementById("editPatronymic").value = u.patronymic || "";
-  document.getElementById("editDOB").value = u.dob || "";
-  document.getElementById("editRole").value = u.role;
-  document.getElementById("editChildForm").classList.remove("hidden");
-  document.getElementById("editChildForm").dataset.login = login; // сохранить логин
-}
-
-function saveChildEdit() {
-  const login = document.getElementById("editChildForm").dataset.login || currentUser;
-  users[login].name = document.getElementById("editName").value;
-  users[login].surname = document.getElementById("editSurname").value;
-  users[login].patronymic = document.getElementById("editPatronymic").value;
-  users[login].dob = document.getElementById("editDOB").value;
-  users[login].role = document.getElementById("editRole").value;
-  localStorage.setItem("users", JSON.stringify(users));
-  alert("Пользователь обновлён");
-  document.getElementById("editChildForm").classList.add("hidden");
-  renderUserList();
-}
-
-function cancelChildEdit() {
-  document.getElementById("editChildForm").classList.add("hidden");
-}
-
-window.onload = function() {
-  const current = localStorage.getItem("currentUser");
-  if (current && users[current]) {
-    showApp(current);
-  }
-  const roleSelect = document.getElementById("newUserRole");
-  if (roleSelect) {
-    roleSelect.onchange = () => {
-      document.getElementById("parentExtraFields").classList.toggle("hidden", roleSelect.value !== "parent");
-    };
-  }
-  const createUserForm = document.getElementById("createUserForm");
-  if (createUserForm) {
-    createUserForm.onsubmit = function(e) {
-      e.preventDefault();
-      const login = document.getElementById("newLogin").value;
-      if (users[login]) return alert("Такой логин уже существует");
-      const role = document.getElementById("newUserRole").value;
-      const u = {
-        name: document.getElementById("newUserName").value,
-        password: document.getElementById("newUserPassword").value,
-        role: role
-      };
-      if (role === "parent") {
-        u.surname = document.getElementById("newUserSurname").value;
-        u.patronymic = document.getElementById("newUserPatronymic").value;
-        u.dob = document.getElementById("newUserDOB").value;
-      }
-      users[login] = u;
-      localStorage.setItem("users", JSON.stringify(users));
-      alert("Пользователь создан");
-      renderUserList();
-      createUserForm.reset();
-    };
+window.onload = async () => {
+  await loadData();
+  const saved = localStorage.getItem("currentUser");
+  if (saved && data.users[saved]) {
+    currentUser = saved;
+    currentRole = data.users[saved].role;
+    showApp();
   }
 };
